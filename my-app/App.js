@@ -1,19 +1,47 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import { AppLoading } from 'expo';
+import { Asset } from 'expo-asset';
+import { Provider } from 'react-redux'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Iam in</Text>
-    </View>
-  );
+import store from './src/stores'
+import Navigation from './src/navigation'
+
+const images = [
+  require('./assets/images/icons8-left-100.png'),
+
+]
+
+class App extends Component {
+
+  state = {
+    isLoading: false
+  }
+
+  handleResources = async () => {
+    const cacheImages = images.map(image => {
+      return Asset.fromModule(image).downloadAsync()
+    })
+    return Promise.all(cacheImages)
+  }
+
+  render() {
+
+    if (!this.state.isLoading && !this.props.skipLoadingScreen) {
+      return (
+        <AppLoading 
+          startAsync={this.handleResources}
+          onError={console.ward}
+          onFinish={() => this.setState({ isLoading: true })}
+        />
+      )
+    }
+
+    return (
+      <Provider store={store}>
+       <Navigation />
+      </Provider>
+    )
+  }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App
